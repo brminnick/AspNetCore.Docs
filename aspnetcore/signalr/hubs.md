@@ -5,7 +5,7 @@ description: Learn how to use hubs in ASP.NET Core SignalR.
 monikerRange: '>= aspnetcore-2.1'
 ms.author: bradyg
 ms.custom: mvc
-ms.date: 01/16/2020
+ms.date: 03/28/2022
 no-loc: [".NET MAUI", "Mac Catalyst", "Blazor Hybrid", Home, Privacy, Kestrel, appsettings.json, "ASP.NET Core Identity", cookie, Cookie, Blazor, "Blazor Server", "Blazor WebAssembly", "Identity", "Let's Encrypt", Razor, SignalR]
 uid: signalr/hubs
 ---
@@ -16,8 +16,6 @@ uid: signalr/hubs
 
 By [Rachel Appel](https://twitter.com/rachelappel) and [Kevin Griffin](https://twitter.com/1kevgriff)
 
-[View or download sample code](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/signalr/hubs/samples/) [(how to download)](xref:index#how-to-download-a-sample)
-
 ## What is a SignalR hub
 
 The SignalR Hubs API enables you to call methods on connected clients from the server. In the server code, you define methods that are called by client. In the client code, you define methods that are called from the server. SignalR takes care of everything behind the scenes that makes real-time client-to-server and server-to-client communications possible.
@@ -26,31 +24,17 @@ The SignalR Hubs API enables you to call methods on connected clients from the s
 
 The SignalR middleware requires some services, which are configured by calling <xref:Microsoft.Extensions.DependencyInjection.SignalRDependencyInjectionExtensions.AddSignalR%2A>:
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Startup.cs" range="38":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Program.cs" id="snippet_AddSignalR" highlight="4":::
 
 When adding SignalR functionality to an ASP.NET Core app, setup SignalR routes by calling <xref:Microsoft.AspNetCore.Builder.HubEndpointRouteBuilderExtensions.MapHub%2A> in the `Startup.Configure` method's <xref:Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseEndpoints%2A> callback:
 
-```csharp
-app.UseRouting();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<ChatHub>("/chathub");
-});
-```
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Program.cs" id="snippet_MapHub" highlight="2":::
 
 ## Create and use hubs
 
 Create a hub by declaring a class that inherits from <xref:Microsoft.AspNetCore.SignalR.Hub>, and add public methods to it. Clients can call methods that are defined as `public`:
 
-```csharp
-public class ChatHub : Hub
-{
-    public Task SendMessage(string user, string message)
-    {
-        return Clients.All.SendAsync("ReceiveMessage", user, message);
-    }
-}
-```
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Hubs/ChatHub.cs" id="snippet_Class":::
 
 You can specify a return type and parameters, including complex types and arrays, as you would in any C# method. SignalR handles the serialization and deserialization of complex objects and arrays in your parameters and return values.
 
@@ -114,7 +98,7 @@ To make calls to specific clients, use the properties of the `Clients` object. I
 * `SendMessageToCaller` sends a message back to the caller, using `Clients.Caller`.
 * `SendMessageToGroup` sends a message to all clients in the `SignalR Users` group.
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/ChatHub.cs" id="HubMethods":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/ChatHub.cs" id="snippet_Clients":::
 
 ## Strongly typed hubs
 
@@ -122,11 +106,11 @@ A drawback of using `SendAsync` is that it relies on a magic string to specify t
 
 An alternative to using `SendAsync` is to strongly type the <xref:Microsoft.AspNetCore.SignalR.Hub> with <xref:Microsoft.AspNetCore.SignalR.Hub%601>. In the following example, the `ChatHub` client methods have been extracted out into an interface called `IChatClient`.
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/IChatClient.cs" id="snippet_IChatClient":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/IChatClient.cs" id="snippet_Interface":::
 
 This interface can be used to refactor the preceding `ChatHub` example:
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/StronglyTypedChatHub.cs" range="8-18,36":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/StronglyTypedChatHub.cs" id="snippet_Class":::
 
 Using `Hub<IChatClient>` enables compile-time checking of the client methods. This prevents issues caused by using magic strings, since `Hub<T>` can only provide access to the methods defined in the interface.
 
@@ -146,17 +130,17 @@ public interface IClient
 
 By default, a server hub method name is the name of the .NET method. However, you can use the [HubMethodName](xref:Microsoft.AspNetCore.SignalR.HubMethodNameAttribute) attribute to change this default and manually specify a name for the method. The client should use this name, instead of the .NET method name, when invoking the method:
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/ChatHub.cs" id="HubMethodName" highlight="1":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/ChatHub.cs" id="snippet_HubMethodName" highlight="1":::
 
 ## Handle events for a connection
 
 The SignalR Hubs API provides the <xref:Microsoft.AspNetCore.SignalR.Hub.OnConnectedAsync%2A> and <xref:Microsoft.AspNetCore.SignalR.Hub.OnDisconnectedAsync%2A> virtual methods to manage and track connections. Override the `OnConnectedAsync` virtual method to perform actions when a client connects to the Hub, such as adding it to a group:
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/ChatHub.cs" id="OnConnectedAsync":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/ChatHub.cs" id="snippet_OnConnectedAsync":::
 
 Override the `OnDisconnectedAsync` virtual method to perform actions when a client disconnects. If the client disconnects intentionally (by calling `connection.stop()`, for example), the `exception` parameter will be `null`. However, if the client is disconnected due to an error (such as a network failure), the `exception` parameter will contain an exception describing the failure:
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/ChatHub.cs" id="OnDisconnectedAsync":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/ChatHub.cs" id="snippet_OnDisconnectedAsync":::
 
 [!INCLUDE[](~/includes/connectionid-signalr.md)]
 
@@ -164,25 +148,26 @@ Override the `OnDisconnectedAsync` virtual method to perform actions when a clie
 
 Exceptions thrown in your hub methods are sent to the client that invoked the method. On the JavaScript client, the `invoke` method returns a [JavaScript Promise](https://developer.mozilla.org/docs/Web/JavaScript/Guide/Using_promises). When the client receives an error with a handler attached to the promise using `catch`, it's invoked and passed as a JavaScript `Error` object:
 
-:::code language="JavaScript" source="hubs/samples/2.x/SignalRChat/wwwroot/js/chat.js" range="23":::
+:::code language="JavaScript" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/wwwroot/chat.js" id="snippet_TryCatch":::
 
 If your Hub throws an exception, connections aren't closed. By default, SignalR returns a generic error message to the client. For example:
 
 ```
-Microsoft.AspNetCore.SignalR.HubException: An unexpected error occurred invoking 'MethodName' on the server.
+Microsoft.AspNetCore.SignalR.HubException: An unexpected error occurred invoking 'SendMessage' on the server.
 ```
 
 Unexpected exceptions often contain sensitive information, such as the name of a database server in an exception triggered when the database connection fails. SignalR doesn't expose these detailed error messages by default as a security measure. For more information on why exception details are suppressed, see [Security considerations in ASP.NET Core SignalR](xref:signalr/security#exceptions).
 
 If you have an exceptional condition you *do* want to propagate to the client, you can use the <xref:Microsoft.AspNetCore.SignalR.HubException> class. If you throw a `HubException` from your hub method, SignalR **will** send the entire message to the client, unmodified:
 
-:::code language="csharp" source="hubs/samples/2.x/SignalRChat/Hubs/ChatHub.cs" id="ThrowHubException" highlight="3":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/hubs/samples/6.x/SignalRHubsSample/Snippets/Hubs/ChatHub.cs" id="snippet_ThrowException":::
 
 > [!NOTE]
 > SignalR only sends the `Message` property of the exception to the client. The stack trace and other properties on the exception aren't available to the client.
 
 ## Additional resources
 
+* [View or download sample code](https://github.com/dotnet/AspNetCore.Docs.Samples/tree/main/signalr/hubs/samples/) [(how to download)](xref:index#how-to-download-a-sample)
 * <xref:signalr/introduction>
 * <xref:signalr/javascript-client>
 * <xref:signalr/publish-to-azure-web-app>
